@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.RectF
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -23,7 +24,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var imageButton: Button
     lateinit var bitmap: Bitmap
     lateinit var model: SsdMobilenetV11Metadata1
-    val labels = FileUtil.loadLabels(this, "labels.txt")
+    lateinit var labels : List<String>
+
     val imageProcessor = ImageProcessor.Builder().add(ResizeOp(300,300,ResizeOp.ResizeMethod.BILINEAR)).build()
 
 
@@ -35,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         intent.setType("image/*")
         intent.setAction(Intent.ACTION_GET_CONTENT)
 
+        labels = FileUtil.loadLabels(this, "labels.txt")
         model = SsdMobilenetV11Metadata1.newInstance(this)
         imageView = findViewById(R.id.imageView)
         imageButton = findViewById(R.id.imageButton)
@@ -75,5 +78,24 @@ class MainActivity : AppCompatActivity() {
 
         var mutable = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(mutable)
+
+
+        val imageHeight = mutable.height
+        val imageWidth = mutable.width
+        paint.textSize= imageHeight/15f
+        paint.strokeWidth = imageHeight/85f
+
+        var x = 0
+        scores.forEachIndexed { index, fl ->
+            x = index
+            if(fl>0.5){
+                paint.style = Paint.Style.STROKE
+                canvas.drawRect(RectF(locations.get(x+1)*imageWidth, locations.get(x)*imageHeight, locations.get(x+3)*imageWidth, locations.get(x+2)*imageHeight),paint)
+                paint.style = Paint.Style.FILL
+                canvas.drawText(fl.toString(), locations.get(x+1)*imageWidth, locations.get(x)*imageHeight, paint)
+            }
+        }
+
+        imageView.setImageBitmap(mutable)
     }
 }
