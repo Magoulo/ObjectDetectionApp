@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         if(requestCode == 101){
             var uri = data?.data
             bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
-            get_predictions();
+            get_predictions()
         }
     }
 
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         val locations = outputs.locationsAsTensorBuffer.floatArray
         val classes = outputs.classesAsTensorBuffer.floatArray
         val scores = outputs.scoresAsTensorBuffer.floatArray
-        val numberOfDetections = outputs.numberOfDetectionsAsTensorBuffer.floatArray
+       // val numberOfDetections = outputs.numberOfDetectionsAsTensorBuffer.floatArray
 
         var mutable = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(mutable)
