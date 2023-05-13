@@ -1,10 +1,7 @@
 package com.example.objectdetectionapp
 
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -64,7 +61,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun get_predictions(){
-
         // Creates inputs for reference.
         var image = TensorImage.fromBitmap(bitmap)
         image = imageProcessor.process(image)
@@ -79,23 +75,27 @@ class MainActivity : AppCompatActivity() {
         var mutable = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(mutable)
 
-
         val imageHeight = mutable.height
         val imageWidth = mutable.width
         paint.textSize= imageHeight/15f
         paint.strokeWidth = imageHeight/85f
 
-        var x = 0
         scores.forEachIndexed { index, fl ->
-            x = index
             if(fl>0.5){
+                val detectedClass = classes[index].toInt() //getting detected class as an integer
+                paint.color = Color.argb(255, detectedClass * 50 % 255, detectedClass * 100 % 255, detectedClass * 150 % 255) // generating a unique color based on class
                 paint.style = Paint.Style.STROKE
-                canvas.drawRect(RectF(locations.get(x+1)*imageWidth, locations.get(x)*imageHeight, locations.get(x+3)*imageWidth, locations.get(x+2)*imageHeight),paint)
+                canvas.drawRect(RectF(locations.get(index*4+1)*imageWidth, locations.get(index*4)*imageHeight, locations.get(index*4+3)*imageWidth, locations.get(index*4+2)*imageHeight),paint)
                 paint.style = Paint.Style.FILL
-                canvas.drawText(fl.toString(), locations.get(x+1)*imageWidth, locations.get(x)*imageHeight, paint)
+                val label = labels[detectedClass] //mapping class to corresponding label
+
+                // Add an offset for the text
+                val textOffset = paint.textSize / 4
+                canvas.drawText("$label ${fl*100}%", locations.get(index*4+1)*imageWidth, locations.get(index*4)*imageHeight - textOffset, paint)
             }
         }
 
         imageView.setImageBitmap(mutable)
     }
+
 }
